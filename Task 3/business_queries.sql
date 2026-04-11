@@ -1,6 +1,7 @@
 --Task 3: Write 10 business questions as SQL
 
 --Q1: List all customers from Germany whose orders total more than €5,000, ordered by total descending.
+-- This query identifies high-value German customers for targeted marketing campaigns.
 SELECT 
     c.customer_id,
     c.company_name,
@@ -12,8 +13,13 @@ WHERE c.country = 'Germany'
 GROUP BY c.customer_id, c.company_name
 HAVING SUM(od.unit_price * od.quantity * (1 - od.discount)) > 5000
 ORDER BY total_spent DESC;
+-- Business insight:
+-- These customers generate significant revenue and should be prioritized for loyalty programs and retention strategies.
+
+
 
 --Q2: Find the top 5 best-selling products by units sold in the most recent complete year.
+-- This query identifies products with the highest demand for inventory planning.
 SELECT 
     p.product_name,
     SUM(od.quantity) AS total_sold
@@ -26,8 +32,13 @@ WHERE EXTRACT(YEAR FROM o.order_date) = (
 GROUP BY p.product_id, p.product_name
 ORDER BY total_sold DESC
 LIMIT 5;
+-- Business insight:
+-- These products represent top demand and should be prioritized in stock management and promotions.
+
+
 
 --Q3: Which product categories have an average unit price above €50?
+-- This query identifies premium product categories for pricing strategy decisions.
 SELECT 
     c.category_name,
     AVG(p.unit_price) AS avg_price
@@ -35,9 +46,13 @@ FROM categories c
 JOIN products p ON p.category_id = c.category_id
 GROUP BY c.category_id, c.category_name
 HAVING AVG(p.unit_price) > 50;
+-- Business insight:
+-- These categories are positioned as premium and may allow higher-margin marketing strategies.
+
 
 
 --Q4: Find all orders that were shipped more than 7 days after the order date.
+-- This query helps monitor delivery delays and improve logistics performance.
 SELECT 
     order_id,
     order_date,
@@ -46,9 +61,13 @@ SELECT
 FROM orders
 WHERE shipped_date IS NOT NULL
 AND (shipped_date - order_date) > 7;
+-- Business insight:
+-- Late shipments highlight inefficiencies in logistics and potential customer dissatisfaction risks.
+
 
 
 --Q5: List customers who placed more than 3 orders but whose average order value is below €200.
+-- This query identifies frequent low-spending customers for upselling opportunities.
 WITH order_values AS (
     SELECT 
         o.order_id,
@@ -67,9 +86,13 @@ JOIN order_values ov ON c.customer_id = ov.customer_id
 GROUP BY c.customer_id, c.company_name
 HAVING COUNT(ov.order_id) > 3
    AND AVG(ov.order_total) < 200;
+-- Business insight:
+-- These customers are highly engaged but under-spending, making them ideal for cross-sell and upsell campaigns.
+
 
    
 --Q6: Which months had total revenue above the overall monthly average?
+-- This query identifies peak-performing months for seasonal trend analysis.
 WITH monthly AS (
     SELECT 
         DATE_TRUNC('month', o.order_date) AS month,
@@ -81,13 +104,20 @@ WITH monthly AS (
 SELECT *
 FROM monthly
 WHERE revenue > (SELECT AVG(revenue) FROM monthly);
+-- Business insight:
+-- These months represent strong sales periods and can guide seasonal planning and promotions.
+
 
 
 --Q7: Find all products that have never been ordered.
+-- This query identifies inactive inventory that may need promotion or removal.
 SELECT p.product_name
 FROM products p
 LEFT JOIN order_details od ON p.product_id = od.product_id
 WHERE od.product_id IS NULL;
+-- Business insight:
+-- These products generate no revenue and may require marketing attention or discontinuation.
+
 
 -- testing product
 INSERT INTO products (product_id, product_name, category_id, unit_price, units_in_stock, discontinued)
@@ -95,8 +125,8 @@ VALUES (9999, 'TEST PRODUCT', 1, 10, 100, 0);
 
 
 
-
 --Q8: What percentage of orders were delivered on time (shipped within 5 days of the order date)?
+-- This query measures logistics performance and delivery efficiency.
 SELECT 
     100.0 * SUM(CASE 
         WHEN shipped_date <= order_date + INTERVAL '5 days' 
@@ -104,9 +134,13 @@ SELECT
     / COUNT(*) AS on_time_percentage
 FROM orders
 WHERE shipped_date IS NOT NULL;
+-- Business insight:
+-- This KPI reflects operational efficiency and customer satisfaction in delivery processes.
+
 
 
 --Q9: Which sales representative had the highest revenue in Q4 of the most recent complete year?
+-- This query evaluates top-performing sales representatives in the most profitable quarter.
 WITH yearly_quarters AS (
     SELECT 
         EXTRACT(YEAR FROM order_date) AS yr,
@@ -154,9 +188,13 @@ SELECT
     revenue
 FROM ranked
 WHERE rnk = 1;
+-- Business insight:
+-- This identifies top-performing sales reps for rewards, bonuses, and performance evaluation.
+
 
 
 --Q10: Find the second-highest revenue product in each category.
+-- This query identifies strong secondary products within each category.
 
 --subquery version
 SELECT *
@@ -198,5 +236,6 @@ ranked AS (
 SELECT *
 FROM ranked
 WHERE rnk = 2;
-
+-- Business insight:
+-- This comparison shows how window functions provide cleaner and more maintainable logic compared to nested subqueries.
 

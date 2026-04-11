@@ -1,15 +1,15 @@
--- =========================================
+-- 
 -- TASK 4 - MULTI TABLE JOIN CHALLENGE
--- Database: join_challenge_db
--- =========================================
+-- Database: e-commerce
+-- 
 
-CREATE DATABASE join_challenge_db;
+CREATE DATABASE e-commerce;
 
-\c join_challenge_db;
+\c e-commerce;
 
--- =========================================
+-- 
 -- TABLES
--- =========================================
+-- 
 
 CREATE TABLE sales_reps (
     sales_rep_id SERIAL PRIMARY KEY,
@@ -49,18 +49,18 @@ CREATE TABLE order_items (
     discount DECIMAL(4,2) DEFAULT 0
 );
 
--- Bridge table (for J3 requirement)
+-- Bridge table 
 CREATE TABLE sales_rep_assignments (
     assignment_id SERIAL PRIMARY KEY,
-    customer_id INT,
-    sales_rep_id INT,
+    customer_id INT REFERENCES customers(customer_id),
+    sales_rep_id INT REFERENCES sales_reps(sales_rep_id),
     start_date DATE,
     end_date DATE
 );
 
--- =========================================
+-- 
 -- SAMPLE DATA
--- =========================================
+-- 
 
 INSERT INTO sales_reps (full_name, region, country) VALUES
 ('Arben Krasniqi', 'West', 'Kosovo'),
@@ -78,6 +78,9 @@ INSERT INTO products (product_name, unit_price) VALUES
 ('Keyboard', 50),
 ('Monitor', 200);
 
+INSERT INTO products (product_name, unit_price)
+VALUES ('iphone', 999);
+
 INSERT INTO orders (customer_id, sales_rep_id, order_date) VALUES
 (1, 1, '2025-01-10'),
 (2, 1, '2025-01-11'),
@@ -90,7 +93,14 @@ INSERT INTO order_items (order_id, product_id, quantity, unit_price, discount) V
 (3, 4, 2, 200, 0.05);
 
 INSERT INTO sales_rep_assignments (customer_id, sales_rep_id, start_date, end_date) VALUES
-(1, 1, '2024-01-01', NULL),
-(2, 2, '2024-01-01', NULL);
+(1, 1, '2024-01-01', '2024-12-31'),
+(1, 2, '2025-01-01', NULL);
+
+
+INSERT INTO sales_rep_assignments (customer_id, sales_rep_id, start_date, end_date) VALUES
+(1, 2, '2024-01-01', NULL),  -- mismatch (intentional)
+(2, 1, '2024-01-01', NULL),  -- mismatch
+(3, 2, '2024-01-01', NULL),
+(4, 1, '2024-01-01', NULL);
 
 
